@@ -1,23 +1,13 @@
-drives = load 'gps_training_10/task3cars_10.txt' using PigStorage(' ') as (time:int,id:int, velocity:float, lat:float, long:float);
+drives = load 'gps_training_10/task3cars_10.txt' using PigStorage(' ') as (time:int,id:int, velocity:float, lat:float, lon:float);
+
+drives_lat_long = foreach drives generate time,id,velocity,  FLOOR(lat*100)/100, FLOOR(lon*100)/100;
 
 group_by_car_id = group drives by (id);
-group_by_lat_long = group drives by (lat, long);
+group_by_lat_long = group drives_lat_long by (lat, lon);
 
-ave_velocity_for_car = foreach group_by_car_id generate flatten(group), AVERAGE(drives.velocity) as ave_velocity;
-ave_velocity_for_lat_long = foreach group_by_lat_long generate flatten(group), AVERAGE(drives.velocity) as ave_velocity;
-
-
-
-%========
-joined = join total_per_attribute by (one,two,three), total_per_class by (one,two,three);
-probabilities = foreach joined generate $0,$1,$2,$7,(double)$8/$3;
-
-store probabilities into 'results/attributes';
+ave_velocity_for_car = foreach group_by_car_id generate flatten(group), AVG(drives.velocity) as ave_velocity;
+ave_velocity_for_lat_long = foreach group_by_lat_long generate flatten(group), AVG(drives.velocity) as ave_velocity;
 
 
-class_group = group trace by (four);
-total_probabilities = foreach class_group generate flatten(group), (double)COUNT(trace)/596 as prob;
-
-store total_probabilities into 'results/totals';
-
-
+store ave_velocity_for_car into 'results/cars';
+store ave_velocity_for_lat_long into 'results/latLong';
