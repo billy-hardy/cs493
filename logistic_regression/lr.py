@@ -1,5 +1,5 @@
 from sklearn import linear_model
 import pandas as pd
-print pd.read_csv('../gps_training_10/task3edges_10.txt')
+print pd.read_csv('../gps_training_10/task3edges_10.txt', sep=" ")
 #clf = linear_model.LinearRegression()
 
